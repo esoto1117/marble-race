@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marble Fall</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="color-selection-screen" class="screen">
+            <h1>Choose Your Marble</h1>
+            <p>Pick the color you think will win!</p>
+            <div id="color-buttons"></div>
+        </div>
+        
+        <div id="game-screen" class="screen hidden">
+            <div id="results-display"></div>
+            <canvas id="game-canvas"></canvas>
+            <div id="hud">
+                <div id="selected-color-display"></div>
+            </div>
+        </div>
+        
+        <div id="result-screen" class="screen hidden">
+            <canvas id="fireworks-canvas"></canvas>
+            <div id="result-message"></div>
+            <button id="play-again-btn">Try Again</button>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="src/game/constants.js"></script>
+    <script src="src/game/Marble.js"></script>
+    <script src="src/game/LevelGenerator.js"></script>
+    <script src="src/game/RaceManager.js"></script>
+    <script src="src/game/Fireworks.js"></script>
+    <script src="src/game/GameManager.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
+
