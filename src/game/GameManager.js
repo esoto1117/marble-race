@@ -194,21 +194,27 @@ class GameManager {
     }
     
     render() {
-        // Clear canvas with black background
-        this.ctx.fillStyle = '#000000';
+        // Clear canvas with dark gradient background
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#0a0a0a');
+        gradient.addColorStop(1, '#000000');
+        this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw bottom boundary line (finish line)
+        // Draw bottom boundary line (finish line) with glow effect
+        this.ctx.shadowColor = '#FFFF00';
+        this.ctx.shadowBlur = 15;
         this.ctx.strokeStyle = '#FFFF00';
-        this.ctx.lineWidth = 3;
-        this.ctx.setLineDash([10, 5]);
+        this.ctx.lineWidth = 4;
+        this.ctx.setLineDash([15, 8]);
         this.ctx.beginPath();
         this.ctx.moveTo(0, CONFIG.bottomBoundary);
         this.ctx.lineTo(this.canvas.width, CONFIG.bottomBoundary);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
+        this.ctx.shadowBlur = 0;
         
-        // Draw platforms (sloped white rectangles)
+        // Draw platforms (sloped white rectangles with shadows and highlights)
         this.platforms.forEach(platform => {
             this.ctx.save();
             this.ctx.translate(platform.position.x, platform.position.y);
@@ -216,23 +222,97 @@ class GameManager {
             
             const width = platform.originalWidth || (platform.bounds.max.x - platform.bounds.min.x);
             const height = platform.originalHeight || CONFIG.platformHeight;
-            this.ctx.fillStyle = '#FFFFFF';
+            
+            // Draw shadow
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            this.ctx.fillRect(-width / 2 + 3, -height / 2 + 3, width, height);
+            
+            // Draw main platform with gradient
+            const platformGradient = this.ctx.createLinearGradient(-width / 2, -height / 2, -width / 2, height / 2);
+            platformGradient.addColorStop(0, '#FFFFFF');
+            platformGradient.addColorStop(0.5, '#E0E0E0');
+            platformGradient.addColorStop(1, '#B0B0B0');
+            this.ctx.fillStyle = platformGradient;
             this.ctx.fillRect(-width / 2, -height / 2, width, height);
+            
+            // Draw top highlight
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            this.ctx.fillRect(-width / 2, -height / 2, width, height * 0.3);
+            
+            // Draw bottom shadow line
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            this.ctx.fillRect(-width / 2, height / 2 - 2, width, 2);
             
             this.ctx.restore();
         });
         
-        // Draw marbles
+        // Draw marbles with 3D effect, shadows, and highlights
         this.raceManager.marbles.forEach(marble => {
             const pos = marble.getPosition();
-            this.ctx.fillStyle = marble.color;
+            const radius = CONFIG.marbleRadius;
+            
+            this.ctx.save();
+            
+            // Draw shadow below marble
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
             this.ctx.beginPath();
-            this.ctx.arc(pos.x, pos.y, CONFIG.marbleRadius, 0, Math.PI * 2);
+            this.ctx.ellipse(pos.x, pos.y + radius + 3, radius * 0.8, radius * 0.3, 0, 0, Math.PI * 2);
             this.ctx.fill();
-            this.ctx.strokeStyle = '#000';
-            this.ctx.lineWidth = 2;
+            
+            // Draw main marble body with gradient for 3D effect
+            const marbleGradient = this.ctx.createRadialGradient(
+                pos.x - radius * 0.3, 
+                pos.y - radius * 0.3, 
+                radius * 0.1,
+                pos.x, 
+                pos.y, 
+                radius
+            );
+            
+            // Create lighter version of marble color for highlight
+            const rgb = this.hexToRgb(marble.color);
+            const lighterColor = `rgb(${Math.min(255, rgb.r + 80)}, ${Math.min(255, rgb.g + 80)}, ${Math.min(255, rgb.b + 80)})`;
+            const darkerColor = `rgb(${Math.max(0, rgb.r - 40)}, ${Math.max(0, rgb.g - 40)}, ${Math.max(0, rgb.b - 40)})`;
+            
+            marbleGradient.addColorStop(0, lighterColor);
+            marbleGradient.addColorStop(0.7, marble.color);
+            marbleGradient.addColorStop(1, darkerColor);
+            
+            this.ctx.fillStyle = marbleGradient;
+            this.ctx.beginPath();
+            this.ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            // Draw highlight (top-left white spot)
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            this.ctx.beginPath();
+            this.ctx.arc(pos.x - radius * 0.3, pos.y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            // Draw smaller inner highlight
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            this.ctx.beginPath();
+            this.ctx.arc(pos.x - radius * 0.25, pos.y - radius * 0.25, radius * 0.2, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            // Draw subtle border
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            this.ctx.lineWidth = 1.5;
+            this.ctx.beginPath();
+            this.ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
             this.ctx.stroke();
+            
+            this.ctx.restore();
         });
+    }
+    
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
     }
     
     resetGame() {
