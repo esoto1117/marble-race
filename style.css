@@ -116,7 +116,7 @@ body {
 #results-display {
     position: absolute;
     top: 10px;
-    left: 20px;
+    right: 20px;
     color: #fff;
     font-size: 1.1em;
     font-family: 'Courier New', monospace;
