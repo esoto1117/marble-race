@@ -42,3 +42,4 @@ Try removing vercel.json entirely:
 - ✅ No build command needed (it's pure HTML/JS)
 - ✅ Framework preset should be "Other" or "None"
 
+
